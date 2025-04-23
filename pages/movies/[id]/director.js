@@ -1,5 +1,4 @@
-import { getMovieById, getDirectorById } from '../../../utils/data';
-
+import { getMovieById, getDirectorById, getAllMovies } from '../../../utils/data';
 export async function getStaticPaths() {
   const paths = getAllMovies().map(movie => ({ params: { id: movie.id } }));
   return { paths, fallback: 'blocking' };
