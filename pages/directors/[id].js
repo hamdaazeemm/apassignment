@@ -2,9 +2,9 @@ import React from 'react';
 import {
   Container,
   Typography,
-  Grid,
   Card,
   CardContent,
+  Grid,
   Button
 } from '@mui/material';
 import Link from 'next/link';
@@ -15,22 +15,26 @@ export async function getServerSideProps(context) {
     ? 'http://' + context.req.headers.host
     : 'https://' + context.req.headers.host;
 
-  const [resMovies, resGenres] = await Promise.all([
-    fetch(`${baseUrl}/api/genres/${id}/movies`),
-    fetch(`${baseUrl}/api/genres`)
-  ]);
+  try {
+    const res = await fetch(`${baseUrl}/api/directors/${id}`);
+    const data = await res.json();
 
-  const movies = await resMovies.json();
-  const genres = await resGenres.json();
-  const genre = genres.find((g) => g.id === id) || { name: 'Unknown Genre' };
+    if (!data || data.error) return { notFound: true };
 
-  return { props: { movies, genre } };
+    return { props: data };
+  } catch (err) {
+    return { notFound: true };
+  }
 }
 
-export default function GenreDetailPage({ genre, movies }) {
+export default function DirectorPage({ director, movies }) {
   return (
     <Container sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>🎭 {genre.name}</Typography>
+      <Typography variant="h4" gutterBottom>{director.name}</Typography>
+      <Typography variant="body1" sx={{ mb: 3 }}>{director.biography}</Typography>
+
+      <Typography variant="h5" sx={{ mb: 2 }}>🎥 Movies Directed:</Typography>
+
       <Grid container spacing={2}>
         {movies.map((movie) => (
           <Grid item xs={12} sm={6} md={4} key={movie._id}>
@@ -46,6 +50,7 @@ export default function GenreDetailPage({ genre, movies }) {
           </Grid>
         ))}
       </Grid>
+
       <Link href="/" passHref>
         <Button sx={{ mt: 4 }} variant="outlined">← Back to Home</Button>
       </Link>
